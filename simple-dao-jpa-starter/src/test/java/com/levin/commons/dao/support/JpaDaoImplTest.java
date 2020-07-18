@@ -67,14 +67,15 @@ public class JpaDaoImplTest {
     @Autowired
     Group2Dao group2Dao;
 
-    @Autowired
-    UserApi userApi;
 
     @Autowired
     UserApi2 userApi2;
 
     @Autowired
     UserApi3 userApi3;
+
+    @Autowired
+    UserApi userApi;
 
     @Autowired
     UserService userService;
@@ -489,7 +490,7 @@ public class JpaDaoImplTest {
 
         Assert.notNull(user);
 
-        TestEntity entity1 = jpaDao.find(TestEntity.class, entity.getId());
+        List<Object> objects1 = jpaDao.selectFrom(TestEntity.class).find();
 
 
         Integer orderCode = (Integer) user.getOrderCode();

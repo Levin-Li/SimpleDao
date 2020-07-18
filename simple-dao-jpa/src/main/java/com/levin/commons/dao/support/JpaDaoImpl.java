@@ -543,13 +543,13 @@ public class JpaDaoImpl
 
         //如果有事务查询前 flush
         if (em.isJoinedToTransaction()) {
-            em.flush();
+          //  em.flush();
         }
 
         //if (!useQueriesCache) {
-        if (disableSessionCache) {
-            em.clear();
-        }
+//        if (disableSessionCache) {
+//            em.clear();
+//        }
         // }
         return em.find(entityClass, id);
     }
@@ -693,8 +693,11 @@ public class JpaDaoImpl
 
         EntityManager em = getEntityManager();
 
+        //em.setFlushMode(FlushModeType.COMMIT);
+
+
         if (em.isJoinedToTransaction()) {
-            em.flush();
+//            em.flush();
         }
 
         Query query = null;

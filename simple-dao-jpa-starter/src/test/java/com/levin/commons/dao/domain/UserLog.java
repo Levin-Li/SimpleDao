@@ -11,7 +11,7 @@ import java.util.Date;
 /**
  * Created by echo on 2015/11/17.
  */
-@Entity(name = "jpa_dao_test_Task")
+@Entity
 @Data
 @Accessors(chain = true)
 public class UserLog
