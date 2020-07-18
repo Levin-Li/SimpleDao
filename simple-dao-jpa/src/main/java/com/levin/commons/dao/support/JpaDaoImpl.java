@@ -727,7 +727,7 @@ public class JpaDaoImpl
 
         //临时解决方案
         if (!useQueriesCache || disableSessionCache) {
-            em.clear();
+           // em.clear();
         }
 
         return (List<T>) query.getResultList();
