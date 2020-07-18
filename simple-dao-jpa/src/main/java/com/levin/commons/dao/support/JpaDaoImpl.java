@@ -513,6 +513,8 @@ public class JpaDaoImpl
             statement = replacePlaceholder(isNative, statement);
         }
 
+
+
         if (logger.isDebugEnabled()) {
             logger.debug("Update JPQL:[" + statement + "], Param placeholder:" + getParamPlaceholder(isNative)
                     + " , StartIndex: " + getParamStartIndex(isNative) + " , Params:" + paramValueList);
