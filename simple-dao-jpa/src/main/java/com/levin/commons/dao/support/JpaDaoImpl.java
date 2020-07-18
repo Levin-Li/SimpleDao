@@ -352,16 +352,17 @@ public class JpaDaoImpl
     public EntityManager init(EntityManager entityManager) {
 
         if (entityManager != null) {
-            FlushModeType flushMode = entityManager.getFlushMode();
-            if (flushMode == null) {
-                entityManager.setFlushMode(FlushModeType.AUTO);
-            }
 
+            FlushModeType flushMode = entityManager.getFlushMode();
+
+            if (flushMode == null) {
+                //   entityManager.setFlushMode(FlushModeType.AUTO);
+                logger.warn("entityManager flushMode is null," + entityManager);
+            }
 //            query.setHint("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
 //            query.setHint("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
 
 //            entityManager.setProperty();
-
         }
 
         return entityManager;
@@ -383,7 +384,7 @@ public class JpaDaoImpl
             //flush 并且移除出缓存
             //em.flush();
             //移除出缓存
-           // em.detach(entity);
+            // em.detach(entity);
         }
 
         return entity;
@@ -543,7 +544,7 @@ public class JpaDaoImpl
 
         //如果有事务查询前 flush
         if (em.isJoinedToTransaction()) {
-          //  em.flush();
+            //  em.flush();
         }
 
         //if (!useQueriesCache) {
@@ -701,7 +702,6 @@ public class JpaDaoImpl
         }
 
         Query query = null;
-
 
 
         //@todo hibernate 5.2.17 对结果类的映射，不支持自定义的类型
