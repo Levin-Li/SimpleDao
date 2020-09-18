@@ -25,6 +25,12 @@ import org.springframework.jdbc.core.simple.SimpleJdbcCallOperations;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsertOperations;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceUnit;
+import javax.sql.DataSource;
+
 @Configuration
 
 @Role(BeanDefinition.ROLE_SUPPORT)
@@ -48,23 +54,35 @@ public class JpaDaoConfiguration implements ApplicationContextAware {
     }*/
 
 
+    //    @Autowired
+    @PersistenceUnit
+    private EntityManagerFactory entityManagerFactory;
+
+    //    @Autowired
+    @PersistenceContext
+    private EntityManager defaultEntityManager;
+
+    @Autowired
+    DataSource dataSource;
+
     @Bean
     @ConditionalOn(action = ConditionalOn.Action.OnMissingBean, types = JdbcTemplate.class)
     JdbcTemplate jdbcTemplate() {
-        return new JdbcTemplate();
+        return new JdbcTemplate(dataSource);
     }
 
     @Bean
-    @ConditionalOn(action = ConditionalOn.Action.OnMissingBean, types = SimpleJdbcInsertOperations.class)
-    SimpleJdbcInsertOperations simpleJdbcInsertOperations( ) {
+    @ConditionalOn(action = ConditionalOn.Action.OnMissingBean, types = SimpleJdbcInsert.class)
+    SimpleJdbcInsert simpleJdbcInsertOperations() {
         return new SimpleJdbcInsert(jdbcTemplate());
     }
 
     @Bean
-    @ConditionalOn(action = ConditionalOn.Action.OnMissingBean, types = SimpleJdbcCallOperations.class)
-    SimpleJdbcCallOperations simpleJdbcCallOperations( ) {
+    @ConditionalOn(action = ConditionalOn.Action.OnMissingBean, types = SimpleJdbcCall.class)
+    SimpleJdbcCall simpleJdbcCallOperations() {
         return new SimpleJdbcCall(jdbcTemplate());
     }
+
 
     /**
      * 因为在注册期 JpaDao bean 已经被引用，所以事务注解不会尝试重试初始化 JpaDao bean
@@ -89,38 +107,6 @@ public class JpaDaoConfiguration implements ApplicationContextAware {
 
         return new JpaDaoImpl();
     }
-
-
-/*
-    FactoryBean<JpaDao> newJpaDao() {
-
-        //一定要返回 FactoryBean<JpaDao>
-
-        //务必要返回代理对象，否则事务扫描，不会生效
-
-        ProxyFactoryBean proxyFactoryBean = new ProxyFactoryBean();
-
-        JpaDaoImpl target = new JpaDaoImpl();
-
-        // proxyFactoryBean.setProxyTargetClass(true);
-
-//        context.getAutowireCapableBeanFactory().autowireBean(target);
-//        target.setApplicationContext(context);
-
-
-        context.getAutowireCapableBeanFactory()
-                .configureBean(target, JpaDao.class.getName());
-
-        try {
-            proxyFactoryBean.setProxyInterfaces(new Class[]{JpaDao.class});
-        } catch (ClassNotFoundException e) {
-        }
-
-        proxyFactoryBean.setTarget(target);
-        proxyFactoryBean.setSingleton(true);
-
-        return (FactoryBean) proxyFactoryBean;
-    }*/
 
 
     ApplicationContext context;
