@@ -168,11 +168,16 @@
 
             </dependency>
 
+            <dependency>
+                <groupId>${r"${levin.service-support.groupId}"}</groupId>
+                <artifactId>service-support</artifactId>
+            </dependency>
 
             <dependency>
                 <groupId>${r"${levin.simple-dao.groupId}"}</groupId>
                 <artifactId>simple-dao-jpa-starter</artifactId>
             </dependency>
+
 
             <dependency>
                 <groupId>org.springframework.boot</groupId>

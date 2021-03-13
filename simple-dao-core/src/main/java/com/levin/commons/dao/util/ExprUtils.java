@@ -53,9 +53,6 @@ public abstract class ExprUtils {
      */
     private static final Map<String, List<String>> refCache = new ConcurrentReferenceHashMap<>();
 
-
-    private static final Logger log = LoggerFactory.getLogger(ExprUtils.class);
-
     /**
      * 核心方法 生成语句，并返回参数
      *
@@ -436,8 +433,9 @@ public abstract class ExprUtils {
 
         SelectDaoImpl selectDao = new SelectDaoImpl(dao, isNative);
 
-        if (context != null)
+        if (context != null) {
             selectDao.setContext(context);
+        }
 
         // selectDao.localParamPlaceholder = this.localParamPlaceholder;
 

@@ -5,6 +5,7 @@ import com.levin.commons.dao.*;
 import com.levin.commons.dao.util.ExceptionUtils;
 import com.levin.commons.dao.util.ObjectUtil;
 import com.levin.commons.dao.util.QLUtils;
+import com.levin.commons.dao.util.QueryAnnotationUtil;
 import com.levin.commons.service.support.ContextHolder;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -958,34 +959,93 @@ public class JpaDaoImpl
 
     @Override
     public <E> List<E> findByQueryObj(Object... queryObjs) {
-        return newDao(SelectDao.class, queryObjs).find(tryFindResultClass(queryObjs));
+        return findByQueryObj(tryFindResultClass(queryObjs), queryObjs);
     }
 
     @Override
     public <E> RS<E> findTotalsAndResultList(Object... queryObjs) {
 
-        SelectDao selectDao = newDao(SelectDao.class, queryObjs);
+        Class type = tryFindResultClass(queryObjs);
+
+        boolean hasSelectAnnotationField = QueryAnnotationUtil.hasSelectAnnotationField(type);
+
+        SelectDao selectDao = null;
+
+        if (hasSelectAnnotationField && !hasType(type, queryObjs)) {
+            selectDao = newDao(SelectDao.class, queryObjs, type);
+        } else {
+            selectDao = newDao(SelectDao.class, queryObjs);
+        }
 
         return new TRS<E>()
                 .setTotals(selectDao.count())
-                .setResultList((List<E>) selectDao.find(tryFindResultClass(queryObjs)));
+                .setResultList((List<E>) selectDao.find(type));
+
     }
+
 
     @Override
     public <E> E findOneByQueryObj(Object... queryObjs) {
-        return (E) newDao(SelectDao.class, queryObjs).findOne(tryFindResultClass(queryObjs));
+
+        return (E) findOneByQueryObj(tryFindResultClass(queryObjs), queryObjs);
     }
 
     @Override
     public <E> List<E> findByQueryObj(Class<E> type, Object... queryObjs) {
+
+        if (type == null) {
+            type = tryFindResultClass(queryObjs);
+        }
+
+        boolean hasSelectAnnotationField = QueryAnnotationUtil.hasSelectAnnotationField(type);
+
+        if (hasSelectAnnotationField && !hasType(type, queryObjs)) {
+            return newDao(SelectDao.class, queryObjs, type).find(type);
+        }
+
         return newDao(SelectDao.class, queryObjs).find(type);
     }
 
+
     @Override
     public <E> E findOneByQueryObj(Class<E> type, Object... queryObjs) {
+
+
+        if (type == null) {
+            type = tryFindResultClass(queryObjs);
+        }
+
+        boolean hasSelectAnnotationField = QueryAnnotationUtil.hasSelectAnnotationField(type);
+
+        if (hasSelectAnnotationField && !hasType(type, queryObjs)) {
+            return (E) newDao(SelectDao.class, queryObjs, type).findOne(type);
+        }
+
+
         return (E) newDao(SelectDao.class, queryObjs).findOne(type);
     }
 
+
+    /**
+     * @param type
+     * @param queryObjs
+     * @return
+     */
+    private static boolean hasType(Class type, Object... queryObjs) {
+
+        if (type == null || queryObjs == null) {
+            return false;
+        }
+
+        for (Object queryObj : queryObjs) {
+            if (type == queryObj
+                    || (queryObj != null && type.isAssignableFrom(queryObj.getClass()))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 

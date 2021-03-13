@@ -2,9 +2,6 @@ package com.levin.commons.dao.codegen.plugins;
 
 import com.levin.commons.utils.MapUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -15,7 +12,6 @@ import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,16 +28,17 @@ public class ProjectTemplateGeneratorMojo extends BaseMojo {
     /**
      * 生成的子模块名称
      * 如果为空，则表示示例代码生成在当前模块,不会创建子模块
-     * 如果当前模块不是 pom模块，则subModuleName名称没有意义。
+     * 如果当前模块不是 pom 模块，则subModuleName名称没有意义，也不会创建子模块。
      */
     @Parameter
     private String subModuleName = "";
 
     /**
      * 模块包名
+     * 如果没有配置，则自动获取 pom 文件中定义的 GroupId
      */
     @Parameter
-    private String packageName = "";
+    private String modulePackageName = "";
 
 
     @Override
@@ -57,10 +54,9 @@ public class ProjectTemplateGeneratorMojo extends BaseMojo {
                 subModuleName = subModuleName.trim();
             }
 
-            if (!hasText(this.packageName)) {
-                packageName = mavenProject.getGroupId();
+            if (!hasText(this.modulePackageName)) {
+                modulePackageName = mavenProject.getGroupId();
             }
-
 
             boolean hasSubModule = hasText(this.subModuleName);
 
@@ -68,7 +64,7 @@ public class ProjectTemplateGeneratorMojo extends BaseMojo {
 
             entitiesModuleDir.mkdirs();
 
-            File entitiesDir = new File(entitiesModuleDir, "src/main/java/" + packageName.replace('.', '/') + "/entities");
+            File entitiesDir = new File(entitiesModuleDir, "src/main/java/" + modulePackageName.replace('.', '/') + "/entities");
 
             entitiesDir.mkdirs();
 
@@ -79,8 +75,8 @@ public class ProjectTemplateGeneratorMojo extends BaseMojo {
             //拷贝 POM 文件
 
             MapUtils.Builder<String, String> mapBuilder =
-                    MapUtils.put("CLASS_PACKAGE_NAME", packageName + ".entities")
-                            .put("modulePackageName", packageName)
+                    MapUtils.put("CLASS_PACKAGE_NAME", modulePackageName + ".entities")
+                            .put("modulePackageName", modulePackageName)
                             .put("now", new Date().toString());
 
             copyAndReplace(false, resTemplateDir + "TableOption.java", new File(entitiesDir, "TableOption.java"), mapBuilder.build());
@@ -165,7 +161,7 @@ public class ProjectTemplateGeneratorMojo extends BaseMojo {
                     mapBuilder.put("parent.groupId", "org.springframework.boot")
                             .put("parent.artifactId", "spring-boot-starter-parent")
                             .put("parent.version", "2.3.4.RELEASE");
-                }else {
+                } else {
                     mapBuilder.put("parent.groupId", mavenProject.getParent().getGroupId())
                             .put("parent.artifactId", mavenProject.getParent().getArtifactId())
                             .put("parent.version", mavenProject.getParent().getVersion());

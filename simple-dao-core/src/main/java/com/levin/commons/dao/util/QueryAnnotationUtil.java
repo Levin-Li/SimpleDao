@@ -97,6 +97,7 @@ public abstract class QueryAnnotationUtil {
     //缓存属性
     private static final Map<String, List<Field>> cacheFields = new ConcurrentReferenceHashMap<>();
 
+    private static final Map<String, Boolean> hasSelectAnnotationCache = new ConcurrentReferenceHashMap<>();
 
     public static final Map<String, Object> cacheEntityOptionMap = new ConcurrentReferenceHashMap<>();
 
@@ -427,14 +428,74 @@ public abstract class QueryAnnotationUtil {
             }
         }
 
-
         return output;
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    public static boolean hasSelectAnnotationField(Class type) {
+        return hasSelectAnnotationField(type, null);
+    }
+
+    /**
+     * 是否有选择注解的字段
+     * <p>
+     * 不支持嵌套
+     *
+     * @param type
+     * @return
+     */
+    public static boolean hasSelectAnnotationField(Class type, ResolvableType resolvableType) {
+
+        if (type == null) {
+            return false;
+        }
+
+        Boolean hasAnno = hasSelectAnnotationCache.get(type.getName());
+
+        if (hasAnno == null) {
+
+            hasAnno = false;
+
+            if (resolvableType == null) {
+                resolvableType = ResolvableType.forClass(type);
+            }
+
+            List<Field> cacheFields = getCacheFields(type);
+
+            for (Field field : cacheFields) {
+
+                if (field.isAnnotationPresent(Select.class)) {
+                    hasAnno = true;
+                    break;
+                }
+
+                //如果示复杂对象
+                ResolvableType forField = ResolvableType.forField(field, resolvableType);
+
+                Class<?> fieldType = forField.resolve(field.getType());
+
+                //防止递归
+                if (fieldType != type && isComplexType(fieldType, null)) {
+                    hasAnno = hasSelectAnnotationField(fieldType, forField);
+                }
+
+                if (hasAnno) {
+                    break;
+                }
+
+            }
+
+            hasSelectAnnotationCache.put(type.getName(), hasAnno);
+
+        }
+
+        return hasAnno;
+    }
 
     /**
      * 获取字段列表，以包括所有父对象的子段
+     * <p>
+     * 不包括
      *
      * @param type
      * @return
@@ -460,22 +521,25 @@ public abstract class QueryAnnotationUtil {
      * @param type
      * @return
      */
-    public static List<Field> getFields(Class type, int excludeModifiers) {
+    static List<Field> getFields(Class type, int excludeModifiers) {
 
         List<Field> fields = new ArrayList<>();
 
-        if (isRootObjectType(type)
+        if (type == null
+                || isRootObjectType(type)
                 || isPrimitive(type)
                 || isArray(type)
-                || isIgnore(type))
+                || isIgnore(type)) {
             return fields;
+        }
 
         fields.addAll(getFields(type.getSuperclass(), excludeModifiers));
 
         for (Field field : type.getDeclaredFields()) {
             //如果不是被过滤的类型
-            if ((field.getModifiers() & excludeModifiers) == 0)
+            if ((field.getModifiers() & excludeModifiers) == 0) {
                 fields.add(field);
+            }
         }
 
         return fields;
@@ -691,15 +755,11 @@ public abstract class QueryAnnotationUtil {
     }
 
     public static boolean isIgnore(Class clazz) {
-        return clazz.getAnnotation(Ignore.class) != null;
-    }
-
-    public static boolean isIgnore(Method method) {
-        return method.getAnnotation(Ignore.class) != null;
+        return clazz.isAnnotationPresent(Ignore.class);
     }
 
     public static boolean isIgnore(Field field) {
-        return field.getAnnotation(Ignore.class) != null;
+        return field.isAnnotationPresent(Ignore.class);
     }
 
 }

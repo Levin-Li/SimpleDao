@@ -66,6 +66,6 @@ public @interface Func {
      *
      * @return
      */
-    String desc() default "单参数函数表达式生成规则：value + prefix + 被包围对象 + suffix";
+    String desc() default "函数表达式生成规则：value + prefix + params + suffix";
 
 }

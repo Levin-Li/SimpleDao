@@ -17,6 +17,7 @@ import com.levin.commons.utils.ClassUtils;
 import com.levin.commons.utils.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -862,7 +863,7 @@ public abstract class ConditionBuilderImpl<T, CB extends ConditionBuilder>
      * @param queryObjs
      * @return
      */
-    private static List<Object> expand(List resultList, Object... queryObjs) {
+    protected static List<Object> expand(List resultList, Object... queryObjs) {
 
         if (resultList == null) {
             resultList = new ArrayList();
@@ -876,6 +877,11 @@ public abstract class ConditionBuilderImpl<T, CB extends ConditionBuilder>
 
             if (queryObj == null) {
                 continue;
+            }
+
+            //如果是类，则实例化
+            if (queryObj instanceof Class) {
+                queryObj = BeanUtils.instantiateClass((Class<? extends Object>) queryObj);
             }
 
             if (queryObj.getClass().isArray()) {

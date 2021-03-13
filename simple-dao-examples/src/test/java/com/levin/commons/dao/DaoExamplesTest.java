@@ -320,6 +320,23 @@ public class DaoExamplesTest {
 //          System.out.println(resultList);
     }
 
+
+    @Test
+    public void testSimpleUserQO() {
+
+
+        Object byQueryObj = dao.findByQueryObj(new SimpleUserQO());
+
+        byQueryObj = dao.findByQueryObj(SimpleUserQO.QResult2.class, new SimpleUserQO());
+
+        byQueryObj = dao.findByQueryObj(SimpleUserQO.QResult.class, new SimpleUserQO(), new SimpleUserQO.QResult());
+
+        byQueryObj = dao.findByQueryObj(SimpleUserQO.QResult.class, new SimpleUserQO());
+
+
+        System.out.println(byQueryObj);
+    }
+
     @Test
     public void testJoinFetch() {
 

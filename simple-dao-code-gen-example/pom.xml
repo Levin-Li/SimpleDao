@@ -55,6 +55,15 @@
 
     </repositories>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <!--  插件库 -->
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+
     <distributionManagement>
 
         <!--具体变量来自 Setting 文件-->
